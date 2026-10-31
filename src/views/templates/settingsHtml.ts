@@ -23,7 +23,7 @@ export function getSettingsHtml(): string {
   <div class="header">
     <div class="title-group">
       <h2>Prompt Enhancer</h2>
-      <span class="badge">v1.0.3</span>
+      <span class="badge">v1.0.4</span>
     </div>
   </div>
 
