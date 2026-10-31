@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { getExtensionConfig, validateConfig } from '../config/settings';
-import { InternalLlmService } from './internalLlmService';
-import { OpenAiService } from './openAiService';
+import { OpenRouterService } from './openRouterService';
 import { GeminiService } from './geminiService';
+import { OpenAiService } from './openAiService';
 
 export class NoLanguageModelError extends Error {
   constructor(message: string) {
@@ -12,18 +12,18 @@ export class NoLanguageModelError extends Error {
 }
 
 export class LlmRouter {
-  private readonly internalService: InternalLlmService;
-  private readonly openAiService: OpenAiService;
+  private readonly openRouterService: OpenRouterService;
   private readonly geminiService: GeminiService;
+  private readonly openAiService: OpenAiService;
 
   constructor() {
-    this.internalService = new InternalLlmService();
-    this.openAiService = new OpenAiService();
+    this.openRouterService = new OpenRouterService();
     this.geminiService = new GeminiService();
+    this.openAiService = new OpenAiService();
   }
 
   /**
-   * Routes the prompt to the configured provider (gemini, openai_compatible, or internal vscode.lm).
+   * Routes the prompt to the configured provider (openrouter, gemini, or openai_compatible).
    */
   public async generate(
     systemPrompt: string,
@@ -37,6 +37,10 @@ export class LlmRouter {
       throw new Error(`Configuration Error: ${validation.message}`);
     }
 
+    if (config.provider === 'openrouter') {
+      return await this.openRouterService.generate(config, systemPrompt, userPrompt, cancellationToken);
+    }
+
     if (config.provider === 'gemini') {
       return await this.geminiService.generate(config, systemPrompt, userPrompt, cancellationToken);
     }
@@ -45,25 +49,6 @@ export class LlmRouter {
       return await this.openAiService.generate(config, systemPrompt, userPrompt, cancellationToken);
     }
 
-    // Provider is 'internal':
-    // If user provided a Gemini key in settings, seamlessly leverage it
-    if (config.geminiApiKey) {
-      try {
-        return await this.geminiService.generate(config, systemPrompt, userPrompt, cancellationToken);
-      } catch (geminiErr) {
-        console.warn('[LlmRouter] Gemini fallback failed, attempting vscode.lm:', geminiErr);
-      }
-    }
-
-    // Try vscode.lm
-    try {
-      return await this.internalService.generate(systemPrompt, userPrompt, cancellationToken);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes('No Language Model found in VS Code')) {
-        throw new NoLanguageModelError(msg);
-      }
-      throw err;
-    }
+    throw new NoLanguageModelError('No active AI provider configured.');
   }
 }

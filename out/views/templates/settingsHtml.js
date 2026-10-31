@@ -24,21 +24,21 @@ function getSettingsHtml() {
   <div class="header">
     <div class="title-group">
       <h2>Prompt Enhancer</h2>
-      <span class="badge">v1.0.2</span>
+      <span class="badge">v1.0.3</span>
     </div>
   </div>
 
   <div class="section-title">AI Provider Engine</div>
   <div class="provider-grid">
-    <!-- Option 1: Internal Antigravity Context -->
-    <div class="provider-card" id="card-internal" onclick="selectProvider('internal')">
-      <input type="radio" name="provider" value="internal" id="radio-internal">
+    <!-- Option 1: OpenRouter -->
+    <div class="provider-card" id="card-openrouter" onclick="selectProvider('openrouter')">
+      <input type="radio" name="provider" value="openrouter" id="radio-openrouter">
       <div class="provider-info">
         <div class="provider-name">
-          <span>Antigravity Context</span>
-          <span class="pill-free">ZERO TOKENS</span>
+          <span>OpenRouter</span>
+          <span class="pill-free">MULTI-MODEL</span>
         </div>
-        <div class="provider-desc">Local workspace scouting; ready for Antigravity Chat.</div>
+        <div class="provider-desc">Claude 3.5 Sonnet, DeepSeek V3/R1, Llama 3.3.</div>
       </div>
     </div>
 
@@ -54,15 +54,30 @@ function getSettingsHtml() {
       </div>
     </div>
 
-    <!-- Option 3: OpenAI-Compatible -->
+    <!-- Option 3: OpenAI / Custom REST -->
     <div class="provider-card" id="card-openai_compatible" onclick="selectProvider('openai_compatible')">
       <input type="radio" name="provider" value="openai_compatible" id="radio-openai_compatible">
       <div class="provider-info">
         <div class="provider-name">
-          <span>OpenAI / Custom REST</span>
+          <span>Custom / OpenAI REST</span>
         </div>
-        <div class="provider-desc">Groq, OpenRouter, DeepSeek, Ollama, vLLM.</div>
+        <div class="provider-desc">Groq, DeepSeek Direct, Ollama Local, vLLM.</div>
       </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Settings: OpenRouter -->
+  <div id="section-openrouter" style="display: none;">
+    <div class="form-group">
+      <label for="openrouterApiKey">OpenRouter API Key</label>
+      <div class="input-wrapper">
+        <input type="password" id="openrouterApiKey" placeholder="sk-or-v1-..." autocomplete="off">
+        <button type="button" class="toggle-visibility" onclick="togglePass('openrouterApiKey')">👁</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="openrouterModel">Model Identifier</label>
+      <input type="text" id="openrouterModel" value="anthropic/claude-3.5-sonnet" placeholder="anthropic/claude-3.5-sonnet">
     </div>
   </div>
 

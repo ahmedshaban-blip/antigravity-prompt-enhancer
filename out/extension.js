@@ -143,14 +143,14 @@ function updateStatusBar() {
     if (!statusBarItem)
         return;
     const config = (0, settings_1.getExtensionConfig)();
-    if (config.provider === 'gemini') {
+    if (config.provider === 'openrouter') {
+        statusBarItem.text = `$(sparkle) Enhancer: OpenRouter (${config.openrouterModel.split('/').pop()})`;
+    }
+    else if (config.provider === 'gemini') {
         statusBarItem.text = `$(sparkle) Enhancer: Gemini (${config.geminiModel})`;
     }
-    else if (config.provider === 'openai_compatible') {
-        statusBarItem.text = `$(sparkle) Enhancer: OpenAI (${config.openaiModel})`;
-    }
     else {
-        statusBarItem.text = `$(sparkle) Enhancer: Antigravity Context`;
+        statusBarItem.text = `$(sparkle) Enhancer: Custom (${config.openaiModel})`;
     }
 }
 function deactivate() {

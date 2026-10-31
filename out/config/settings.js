@@ -40,7 +40,9 @@ const vscode = __importStar(require("vscode"));
 exports.CONFIG_SECTION = 'antigravityEnhancer';
 function getExtensionConfig() {
     const configuration = vscode.workspace.getConfiguration(exports.CONFIG_SECTION);
-    const provider = configuration.get('provider', 'internal');
+    const provider = configuration.get('provider', 'openrouter');
+    const openrouterApiKey = configuration.get('openrouterApiKey', '').trim();
+    const openrouterModel = configuration.get('openrouterModel', 'anthropic/claude-3.5-sonnet').trim();
     const geminiApiKey = configuration.get('geminiApiKey', '').trim();
     const geminiModel = configuration.get('geminiModel', 'gemini-2.5-flash').trim();
     const openaiBaseUrl = configuration.get('openaiBaseUrl', 'https://api.openai.com/v1').trim();
@@ -49,6 +51,8 @@ function getExtensionConfig() {
     const maxContextFiles = configuration.get('maxContextFiles', 3);
     return {
         provider,
+        openrouterApiKey,
+        openrouterModel,
         geminiApiKey,
         geminiModel,
         openaiBaseUrl,
@@ -58,11 +62,11 @@ function getExtensionConfig() {
     };
 }
 function validateConfig(config) {
-    if (config.provider === 'openai_compatible') {
-        if (!config.openaiBaseUrl) {
+    if (config.provider === 'openrouter') {
+        if (!config.openrouterApiKey) {
             return {
                 valid: false,
-                message: 'OpenAI Base URL is empty. Please set antigravityEnhancer.openaiBaseUrl in settings.'
+                message: 'OpenRouter API key is missing. Please set antigravityEnhancer.openrouterApiKey in settings.'
             };
         }
     }
@@ -71,6 +75,14 @@ function validateConfig(config) {
             return {
                 valid: false,
                 message: 'Google Gemini API key is missing. Please set antigravityEnhancer.geminiApiKey in settings.'
+            };
+        }
+    }
+    if (config.provider === 'openai_compatible') {
+        if (!config.openaiBaseUrl) {
+            return {
+                valid: false,
+                message: 'OpenAI Base URL is empty. Please set antigravityEnhancer.openaiBaseUrl in settings.'
             };
         }
     }

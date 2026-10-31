@@ -7,7 +7,7 @@ exports.getSettingsScript = getSettingsScript;
 function getSettingsScript() {
     return `
     const vscode = acquireVsCodeApi();
-    let currentProvider = 'internal';
+    let currentProvider = 'openrouter';
 
     function selectProvider(prov) {
       currentProvider = prov;
@@ -19,6 +19,7 @@ function getSettingsScript() {
       if (radio) radio.checked = true;
 
       // Toggle dynamic input sections
+      document.getElementById('section-openrouter').style.display = prov === 'openrouter' ? 'block' : 'none';
       document.getElementById('section-gemini').style.display = prov === 'gemini' ? 'block' : 'none';
       document.getElementById('section-openai').style.display = prov === 'openai_compatible' ? 'block' : 'none';
     }
@@ -37,6 +38,8 @@ function getSettingsScript() {
     function gatherPayload() {
       return {
         provider: currentProvider,
+        openrouterApiKey: document.getElementById('openrouterApiKey').value.trim(),
+        openrouterModel: document.getElementById('openrouterModel').value.trim() || 'anthropic/claude-3.5-sonnet',
         geminiApiKey: document.getElementById('geminiApiKey').value.trim(),
         geminiModel: document.getElementById('geminiModel').value.trim() || 'gemini-2.5-flash',
         openaiBaseUrl: document.getElementById('openaiBaseUrl').value.trim() || 'https://api.openai.com/v1',
@@ -64,7 +67,9 @@ function getSettingsScript() {
       const msg = event.data;
       if (msg.type === 'loadConfig') {
         const cfg = msg.config;
-        selectProvider(cfg.provider || 'internal');
+        selectProvider(cfg.provider || 'openrouter');
+        document.getElementById('openrouterApiKey').value = cfg.openrouterApiKey || '';
+        document.getElementById('openrouterModel').value = cfg.openrouterModel || 'anthropic/claude-3.5-sonnet';
         document.getElementById('geminiApiKey').value = cfg.geminiApiKey || '';
         document.getElementById('geminiModel').value = cfg.geminiModel || 'gemini-2.5-flash';
         document.getElementById('openaiBaseUrl').value = cfg.openaiBaseUrl || 'https://api.openai.com/v1';

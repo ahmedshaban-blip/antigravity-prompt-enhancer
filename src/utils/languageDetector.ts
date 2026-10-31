@@ -42,3 +42,4 @@ export function inferLanguage(filePath: string): string {
       return 'plaintext';
   }
 }
+

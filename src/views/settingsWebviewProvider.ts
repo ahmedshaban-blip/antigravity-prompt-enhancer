@@ -37,7 +37,7 @@ export class SettingsWebviewProvider implements vscode.WebviewViewProvider {
           break;
         }
         case 'testConnection': {
-          await this.handleTestConnection(message.payload);
+          await this.handleTestConnection();
           break;
         }
         case 'triggerEnhance': {
@@ -72,6 +72,8 @@ export class SettingsWebviewProvider implements vscode.WebviewViewProvider {
     const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
     try {
       await config.update('provider', payload.provider, vscode.ConfigurationTarget.Global);
+      await config.update('openrouterApiKey', payload.openrouterApiKey, vscode.ConfigurationTarget.Global);
+      await config.update('openrouterModel', payload.openrouterModel, vscode.ConfigurationTarget.Global);
       await config.update('geminiApiKey', payload.geminiApiKey, vscode.ConfigurationTarget.Global);
       await config.update('geminiModel', payload.geminiModel, vscode.ConfigurationTarget.Global);
       await config.update('openaiBaseUrl', payload.openaiBaseUrl, vscode.ConfigurationTarget.Global);
@@ -95,7 +97,7 @@ export class SettingsWebviewProvider implements vscode.WebviewViewProvider {
     }
   }
 
-  private async handleTestConnection(payload: ExtensionConfig): Promise<void> {
+  private async handleTestConnection(): Promise<void> {
     const startTime = Date.now();
     this._view?.webview.postMessage({
       type: 'testStatus',
@@ -104,25 +106,6 @@ export class SettingsWebviewProvider implements vscode.WebviewViewProvider {
     });
 
     try {
-      if (payload.provider === 'internal') {
-        const models = await vscode.lm.selectChatModels();
-        const latency = Date.now() - startTime;
-        if (models && models.length > 0) {
-          this._view?.webview.postMessage({
-            type: 'testStatus',
-            status: 'success',
-            text: `Connected to ${models[0].name || models[0].id} (${latency}ms)`
-          });
-        } else {
-          this._view?.webview.postMessage({
-            type: 'testStatus',
-            status: 'info',
-            text: `Antigravity Context Mode ready (Local Engine, 0ms)`
-          });
-        }
-        return;
-      }
-
       const result = await this._llmRouter.generate(
         'You are a connectivity test.',
         'Reply with the single word: OK'

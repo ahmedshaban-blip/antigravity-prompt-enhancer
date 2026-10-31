@@ -2,7 +2,7 @@
   "name": "antigravity-prompt-enhancer",
   "displayName": "Antigravity Prompt Enhancer",
   "description": "Intelligent Two-Stage Context Discovery and Master Prompt Synthesis for Antigravity AI Chat",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "publisher": "ahmedshaban",
   "icon": "icon.png",
   "repository": {
@@ -75,12 +75,22 @@
         "antigravityEnhancer.provider": {
           "type": "string",
           "enum": [
-            "internal",
+            "openrouter",
             "gemini",
             "openai_compatible"
           ],
-          "default": "internal",
-          "description": "AI provider backend: Antigravity Smart Context / internal models, Google Gemini API, or OpenAI-compatible REST API."
+          "default": "openrouter",
+          "description": "AI provider backend: OpenRouter, Google Gemini API, or OpenAI-compatible REST API."
+        },
+        "antigravityEnhancer.openrouterApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenRouter API key (supports Claude 3.5 Sonnet, DeepSeek V3/R1, Llama 3.3, etc.)."
+        },
+        "antigravityEnhancer.openrouterModel": {
+          "type": "string",
+          "default": "anthropic/claude-3.5-sonnet",
+          "description": "OpenRouter model identifier (e.g. anthropic/claude-3.5-sonnet, deepseek/deepseek-chat, google/gemini-2.0-flash-exp:free)."
         },
         "antigravityEnhancer.geminiApiKey": {
           "type": "string",
