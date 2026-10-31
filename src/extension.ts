@@ -7,6 +7,7 @@ import { PromptSynthesizer } from './services/promptSynthesizer';
 import { ProjectScanner } from './context/projectScanner';
 import { StackDetector } from './context/stackDetector';
 import { ClipboardPipeline } from './pipeline/clipboardPipeline';
+import { SettingsWebviewProvider } from './views/settingsWebviewProvider';
 
 let projectScanner: ProjectScanner | undefined;
 let statusBarItem: vscode.StatusBarItem | undefined;
@@ -20,15 +21,31 @@ export function activate(context: vscode.ExtensionContext): void {
   const promptSynthesizer = new PromptSynthesizer(llmRouter);
   const clipboardPipeline = new ClipboardPipeline();
 
+  // Register bespoke anti-AI-slop sidebar Webview view
+  const settingsWebviewProvider = new SettingsWebviewProvider(context.extensionUri, llmRouter);
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      SettingsWebviewProvider.viewType,
+      settingsWebviewProvider,
+      {
+        webviewOptions: {
+          retainContextWhenHidden: true
+        }
+      }
+    )
+  );
+
+  // Status Bar Item
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-  statusBarItem.command = 'workbench.action.openSettings';
-  statusBarItem.tooltip = 'Click to configure Antigravity Prompt Enhancer settings';
+  statusBarItem.command = 'antigravityEnhancer.openSettingsView';
+  statusBarItem.tooltip = 'Click to open Antigravity Prompt Enhancer settings in Sidebar';
   updateStatusBar();
   statusBarItem.show();
 
   context.subscriptions.push(statusBarItem);
   context.subscriptions.push(projectScanner);
 
+  // Update status bar when configuration changes
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration(event => {
       if (event.affectsConfiguration(CONFIG_SECTION)) {
@@ -37,6 +54,16 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   );
 
+  // Command to open / focus the sidebar view
+  const openSettingsViewCommand = vscode.commands.registerCommand(
+    'antigravityEnhancer.openSettingsView',
+    async () => {
+      await vscode.commands.executeCommand('antigravityEnhancer.settingsView.focus');
+    }
+  );
+  context.subscriptions.push(openSettingsViewCommand);
+
+  // Register the primary enhancement command (Ctrl+Alt+E / Cmd+Alt+E)
   const enhanceCommand = vscode.commands.registerCommand(
     'antigravityEnhancer.enhancePrompt',
     async () => {
@@ -62,7 +89,7 @@ export function activate(context: vscode.ExtensionContext): void {
         );
 
         if (action === 'Open Settings') {
-          vscode.commands.executeCommand('workbench.action.openSettings', CONFIG_SECTION);
+          vscode.commands.executeCommand('antigravityEnhancer.openSettingsView');
         }
       }
     }

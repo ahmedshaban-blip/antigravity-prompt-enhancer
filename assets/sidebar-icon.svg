@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Prompt Chevron -->
+  <polyline points="4 6 10 12 4 18" />
+  <!-- Prompt Underscore -->
+  <line x1="12" y1="18" x2="20" y2="18" />
+  <!-- AI Sparkle / Star in top-right -->
+  <path d="M18 3 L18.8 6.2 L22 7 L18.8 7.8 L18 11 L17.2 7.8 L14 7 L17.2 6.2 Z" fill="currentColor" stroke="none" />
+</svg>
