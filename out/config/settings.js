@@ -41,12 +41,16 @@ exports.CONFIG_SECTION = 'antigravityEnhancer';
 function getExtensionConfig() {
     const configuration = vscode.workspace.getConfiguration(exports.CONFIG_SECTION);
     const provider = configuration.get('provider', 'internal');
+    const geminiApiKey = configuration.get('geminiApiKey', '').trim();
+    const geminiModel = configuration.get('geminiModel', 'gemini-2.5-flash').trim();
     const openaiBaseUrl = configuration.get('openaiBaseUrl', 'https://api.openai.com/v1').trim();
     const openaiApiKey = configuration.get('openaiApiKey', '').trim();
     const openaiModel = configuration.get('openaiModel', 'gpt-4o-mini').trim();
     const maxContextFiles = configuration.get('maxContextFiles', 3);
     return {
         provider,
+        geminiApiKey,
+        geminiModel,
         openaiBaseUrl,
         openaiApiKey,
         openaiModel,
@@ -58,13 +62,15 @@ function validateConfig(config) {
         if (!config.openaiBaseUrl) {
             return {
                 valid: false,
-                message: 'OpenAI Base URL is empty. Please set antigravityEnhancer.openaiBaseUrl in VS Code settings.'
+                message: 'OpenAI Base URL is empty. Please set antigravityEnhancer.openaiBaseUrl in settings.'
             };
         }
-        if (!config.openaiModel) {
+    }
+    if (config.provider === 'gemini') {
+        if (!config.geminiApiKey) {
             return {
                 valid: false,
-                message: 'OpenAI Model is empty. Please specify a model (e.g. gpt-4o-mini, llama3) in settings.'
+                message: 'Google Gemini API key is missing. Please set antigravityEnhancer.geminiApiKey in settings.'
             };
         }
     }

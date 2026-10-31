@@ -1,14 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PromptSynthesizer = void 0;
+const llmRouter_1 = require("./llmRouter");
 class PromptSynthesizer {
     llmRouter;
     constructor(llmRouter) {
         this.llmRouter = llmRouter;
     }
     /**
-     * Stage 2: Synthesizes an authoritative master prompt combining the user's raw draft,
-     * detected stack, and precision code snippets.
+     * Stage 2: Synthesizes an authoritative master prompt.
+     * If no LLM provider is active in the environment, gracefully generates a high-context
+     * master template so Antigravity's chat model (e.g. Gemini 3.8 Flash) can execute it directly.
      */
     async synthesize(rawDraft, stack, precision, cancellationToken) {
         const systemPrompt = `You are an elite Principal Software Architect and Master Prompt Engineer.
@@ -36,19 +38,13 @@ OUTPUT RULES:
         // 1. Active Editor Highlight (Highest Priority Primary Context)
         if (precision.activeSelection) {
             const sel = precision.activeSelection;
-            contextSections.push(`### PRIMARY FOCUSED CONTEXT (Active Editor Selection: ${sel.relativePath} Lines ${sel.startLine}-${sel.endLine})
-\`\`\`${sel.language}
-${sel.selectedText}
-\`\`\``);
+            contextSections.push(`### PRIMARY FOCUSED CONTEXT (Active Editor Selection: ${sel.relativePath} Lines ${sel.startLine}-${sel.endLine})\n\`\`\`${sel.language}\n${sel.selectedText}\n\`\`\``);
         }
         // 2. Sliced Files from Stage 1
         if (precision.files.length > 0) {
             contextSections.push('### SCOUTED WORKSPACE CODE SLICES');
             for (const file of precision.files) {
-                contextSections.push(`File: \`${file.relativePath}\` (${file.totalLines} lines${file.truncated ? ', first 200 lines' : ''})
-\`\`\`${file.language}
-${file.content}
-\`\`\``);
+                contextSections.push(`File: \`${file.relativePath}\` (${file.totalLines} lines${file.truncated ? ', first 200 lines' : ''})\n\`\`\`${file.language}\n${file.content}\n\`\`\``);
             }
         }
         const assembledContext = contextSections.length > 0
@@ -64,8 +60,66 @@ ${stack.summary}
 ${assembledContext}
 
 Generate the authoritative, unambiguous master prompt now:`;
-        const synthesizedPrompt = await this.llmRouter.generate(systemPrompt, userPrompt, cancellationToken);
-        return synthesizedPrompt.trim();
+        try {
+            const synthesizedPrompt = await this.llmRouter.generate(systemPrompt, userPrompt, cancellationToken);
+            return {
+                prompt: synthesizedPrompt.trim(),
+                mode: 'llm_synthesized'
+            };
+        }
+        catch (err) {
+            if (err instanceof llmRouter_1.NoLanguageModelError) {
+                // Graceful Smart Fallback: generate high-context structured master prompt directly
+                const fallbackPrompt = this.synthesizeSmartTemplate(rawDraft, stack, precision);
+                return {
+                    prompt: fallbackPrompt,
+                    mode: 'context_template'
+                };
+            }
+            throw err;
+        }
+    }
+    /**
+     * Generates a context-rich, structured master prompt template directly from codebase inspection
+     * when no external LLM API key is present.
+     */
+    synthesizeSmartTemplate(rawDraft, stack, precision) {
+        const parts = [];
+        parts.push(`# Objective: ${rawDraft}`);
+        parts.push('');
+        parts.push('## Context & Architecture');
+        parts.push(`- **Detected Stack**: ${stack.summary}`);
+        parts.push('- **Conventions**: Adhere to project architecture, existing state management, and separation of concerns.');
+        parts.push('');
+        parts.push('## Targeted Workspace Context');
+        if (precision.activeSelection) {
+            const sel = precision.activeSelection;
+            parts.push(`- **Focused Selection** (\`${sel.relativePath}\` lines ${sel.startLine}–${sel.endLine}):`);
+            parts.push(`\`\`\`${sel.language}`);
+            parts.push(sel.selectedText);
+            parts.push('```');
+            parts.push('');
+        }
+        if (precision.files.length > 0) {
+            parts.push('### Relevant Scouted Code Files:');
+            for (const f of precision.files) {
+                parts.push(`#### \`${f.relativePath}\``);
+                parts.push(`\`\`\`${f.language}`);
+                parts.push(f.content);
+                parts.push('```');
+                parts.push('');
+            }
+        }
+        else {
+            parts.push('- Inspect project root and apply changes consistent with codebase structure.');
+            parts.push('');
+        }
+        parts.push('## Implementation Directives');
+        parts.push('1. Implement the requested changes addressing the primary objective thoroughly.');
+        parts.push('2. Preserve all existing functionality and ensure zero regression in surrounding modules.');
+        parts.push('3. Provide clean, documented, and production-ready code with appropriate error handling.');
+        parts.push('4. Include verification criteria or tests to validate the solution.');
+        return parts.join('\n');
     }
 }
 exports.PromptSynthesizer = PromptSynthesizer;
