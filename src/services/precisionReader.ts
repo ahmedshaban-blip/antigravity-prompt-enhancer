@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
+import { inferLanguage } from '../utils/languageDetector';
 
 export interface FileSnippet {
   relativePath: string;
@@ -45,7 +45,7 @@ export class PrecisionReader {
         const fullContent = new TextDecoder('utf-8').decode(fileBytes);
         const lines = fullContent.split(/\r?\n/);
         const totalLines = lines.length;
-        const language = this.inferLanguage(relPath);
+        const language = inferLanguage(relPath);
 
         let snippetContent: string;
         let truncated = false;
@@ -95,51 +95,10 @@ export class PrecisionReader {
 
     return {
       relativePath: vscode.workspace.asRelativePath(doc.uri),
-      language: doc.languageId || this.inferLanguage(doc.fileName),
+      language: doc.languageId || inferLanguage(doc.fileName),
       startLine: activeEditor.selection.start.line + 1,
       endLine: activeEditor.selection.end.line + 1,
       selectedText
     };
   }
-
-  public inferLanguage(filePath: string): string {
-    const ext = path.extname(filePath).toLowerCase();
-    switch (ext) {
-      case '.ts':
-        return 'typescript';
-      case '.tsx':
-        return 'tsx';
-      case '.js':
-      case '.mjs':
-      case '.cjs':
-        return 'javascript';
-      case '.jsx':
-        return 'jsx';
-      case '.dart':
-        return 'dart';
-      case '.cs':
-        return 'csharp';
-      case '.py':
-        return 'python';
-      case '.rs':
-        return 'rust';
-      case '.go':
-        return 'go';
-      case '.json':
-        return 'json';
-      case '.html':
-        return 'html';
-      case '.css':
-      case '.scss':
-        return 'css';
-      case '.yaml':
-      case '.yml':
-        return 'yaml';
-      case '.md':
-        return 'markdown';
-      default:
-        return 'plaintext';
-    }
-  }
 }
-

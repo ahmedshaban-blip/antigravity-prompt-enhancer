@@ -35,7 +35,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrecisionReader = void 0;
 const vscode = __importStar(require("vscode"));
-const path = __importStar(require("path"));
+const languageDetector_1 = require("../utils/languageDetector");
 class PrecisionReader {
     static MAX_LINES_CEILING = 200;
     /**
@@ -56,7 +56,7 @@ class PrecisionReader {
                 const fullContent = new TextDecoder('utf-8').decode(fileBytes);
                 const lines = fullContent.split(/\r?\n/);
                 const totalLines = lines.length;
-                const language = this.inferLanguage(relPath);
+                const language = (0, languageDetector_1.inferLanguage)(relPath);
                 let snippetContent;
                 let truncated = false;
                 if (totalLines > PrecisionReader.MAX_LINES_CEILING) {
@@ -101,50 +101,11 @@ class PrecisionReader {
         }
         return {
             relativePath: vscode.workspace.asRelativePath(doc.uri),
-            language: doc.languageId || this.inferLanguage(doc.fileName),
+            language: doc.languageId || (0, languageDetector_1.inferLanguage)(doc.fileName),
             startLine: activeEditor.selection.start.line + 1,
             endLine: activeEditor.selection.end.line + 1,
             selectedText
         };
-    }
-    inferLanguage(filePath) {
-        const ext = path.extname(filePath).toLowerCase();
-        switch (ext) {
-            case '.ts':
-                return 'typescript';
-            case '.tsx':
-                return 'tsx';
-            case '.js':
-            case '.mjs':
-            case '.cjs':
-                return 'javascript';
-            case '.jsx':
-                return 'jsx';
-            case '.dart':
-                return 'dart';
-            case '.cs':
-                return 'csharp';
-            case '.py':
-                return 'python';
-            case '.rs':
-                return 'rust';
-            case '.go':
-                return 'go';
-            case '.json':
-                return 'json';
-            case '.html':
-                return 'html';
-            case '.css':
-            case '.scss':
-                return 'css';
-            case '.yaml':
-            case '.yml':
-                return 'yaml';
-            case '.md':
-                return 'markdown';
-            default:
-                return 'plaintext';
-        }
     }
 }
 exports.PrecisionReader = PrecisionReader;
