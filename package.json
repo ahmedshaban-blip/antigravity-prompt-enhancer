@@ -1,0 +1,96 @@
+{
+  "name": "antigravity-prompt-enhancer",
+  "displayName": "Antigravity Prompt Enhancer",
+  "description": "Intelligent Two-Stage Context Discovery and Master Prompt Synthesis for Antigravity AI Chat",
+  "version": "1.0.0",
+  "publisher": "ahmedshaban",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ahmedshaban-blip/antigravity-prompt-enhancer.git"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "AI",
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "prompt enhancer",
+    "antigravity",
+    "context discovery",
+    "vscode.lm",
+    "ai assistant"
+  ],
+  "license": "MIT",
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "antigravityEnhancer.enhancePrompt",
+        "title": "Enhance Chat Prompt",
+        "category": "Antigravity"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "antigravityEnhancer.enhancePrompt",
+        "key": "ctrl+alt+e",
+        "mac": "cmd+alt+e"
+      }
+    ],
+    "configuration": {
+      "title": "Antigravity Prompt Enhancer",
+      "properties": {
+        "antigravityEnhancer.provider": {
+          "type": "string",
+          "enum": [
+            "internal",
+            "openai_compatible"
+          ],
+          "default": "internal",
+          "description": "AI provider backend: Antigravity internal models (vscode.lm) or OpenAI-compatible REST API."
+        },
+        "antigravityEnhancer.openaiBaseUrl": {
+          "type": "string",
+          "default": "https://api.openai.com/v1",
+          "description": "Base URL for OpenAI-compatible endpoint."
+        },
+        "antigravityEnhancer.openaiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for OpenAI-compatible endpoint."
+        },
+        "antigravityEnhancer.openaiModel": {
+          "type": "string",
+          "default": "gpt-4o-mini",
+          "description": "Model identifier for OpenAI-compatible endpoint."
+        },
+        "antigravityEnhancer.maxContextFiles": {
+          "type": "number",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Maximum number of workspace files to include in Stage 1 context."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.2.1",
+    "typescript": "^5.5.2"
+  }
+}
